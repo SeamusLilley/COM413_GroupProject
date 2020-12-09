@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -27,10 +28,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // user's location is hard coded
     LatLng myLocation = new LatLng(55.00883183718947, -7.31890368972177);
 
-    // arrays for coordinates, names and descriptions
+    // arrays for coordinates, names, descriptions, and images
     ArrayList<LatLng> coordinateList = new ArrayList<LatLng>();
     ArrayList<String> placeNameList = new ArrayList<String>();
     ArrayList<String> descriptionList = new ArrayList<String>();
+    ArrayList<String> imageList = new ArrayList<String>();
+
+    CustomInfoWindowAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +85,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // adds markers to the map using details from the 3 arrays
         for(int i = 0; i < coordinateList.size(); i++){
-            mMap.addMarker(new MarkerOptions().position(coordinateList.get(i)).title(placeNameList.get(i)).snippet(descriptionList.get(i)));
+            Marker a = mMap.addMarker(new MarkerOptions().position(coordinateList.get(i)).title(placeNameList.get(i)).snippet(descriptionList.get(i)));
+            a.setTag("https://lh5.googleusercontent.com/p/AF1QipOYuNFsq_nBQjGXs-T6zc1Khlr8Q4Afl3PLTuYj=w408-h240-k-no-pi-0-ya53.00263-ro-0-fo100");
         }
+
+        mMap.addMarker(new MarkerOptions().position(coordinateList.get(0)).title(placeNameList.get(0)).snippet(descriptionList.get(0)));
 
         // moves the camera to the user's location
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 14));
@@ -92,15 +99,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(Marker marker) {
 
+                /*
                 // passes along the marker's name and description
                 Intent i = new Intent(MapsActivity.this, MoreInfo.class);
                 i.putExtra("title", marker.getTitle());
                 i.putExtra("information", marker.getSnippet());
                 startActivity(i);
+                 */
+
+                adapter = new CustomInfoWindowAdapter(MapsActivity.this, marker.getTag().toString());
+
+                try {
+                    adapter.SetImage(marker.getTag().toString());
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                mMap.setInfoWindowAdapter(adapter);
+                marker.showInfoWindow();
 
                 return false;
             }
         });
+
+
     }
 
     // adds a location's details to the three arrays
@@ -120,6 +144,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addLocation(new LatLng(55.01082716489911,   -7.318217048508025),    "Chillis Indian Restaurant",        "4.5 (105)\nIndian restaurant\n145 Strand Rd, Londonderry BT48 7PW\nOpening Hours: 5pm - 11pm\nchillisrestaurant.net\n028 7126 2050");
         addLocation(new LatLng(55.015406001668126,  -7.31238055858301),     "Caterina’s bistro",                "4.6 (19)\nRestaurant\n15 Culmore Rd, Londonderry BT48 8JB\nOpening Hours:  12–9:30pm");
         addLocation(new LatLng(54.99799325915123,   -7.321525438842466),    "Castle Street Social",             "5.0 (12)\nRestaurant\n12-14 Castle St, Londonderry BT48 6HQ\nOpening Hours: 12–9pm\n028 7137 2888");
+        imageList.add("https://lh5.googleusercontent.com/p/AF1QipOYuNFsq_nBQjGXs-T6zc1Khlr8Q4Afl3PLTuYj=w408-h240-k-no-pi-0-ya53.00263-ro-0-fo100");
     }
 
     // populates the arrays with hotels

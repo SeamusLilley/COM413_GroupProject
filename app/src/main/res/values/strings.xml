@@ -2,4 +2,13 @@
     <string name="app_name">GroupProject</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_route">Map</string>
+
+    <string name="welcome_to_londonderry_city_guide">Welcome To Londonderry City Guide</string>
+    <string name="todo">TODO</string>
+    <string name="by_brendan_frazer_conall_hanley_zita_koczka_seamus_lilley">By Brendan Frazer, Conall Hanley, Zita Koczka, Seamus Lilley</string>
+    <string name="londonderry_city_guide">Londonderry City Guide</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="info_button">info_button</string>
+    <string name="derry_image">Derry_image</string>
 </resources>

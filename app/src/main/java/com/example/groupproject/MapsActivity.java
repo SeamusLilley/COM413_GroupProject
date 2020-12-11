@@ -1,13 +1,24 @@
 package com.example.groupproject;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Camera;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,7 +29,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -35,6 +49,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList<String> imageList = new ArrayList<String>();
 
     CustomInfoWindowAdapter adapter;
+
+    // stuff for getting the user's location
+    final private int REQUEST_COARSE_ACCESS = 123;
+    boolean permissionGranted = false;
+    LocationManager lm;
+    LocationListener locationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,8 +109,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             a.setTag("https://lh5.googleusercontent.com/p/AF1QipOYuNFsq_nBQjGXs-T6zc1Khlr8Q4Afl3PLTuYj=w408-h240-k-no-pi-0-ya53.00263-ro-0-fo100");
         }
 
-        mMap.addMarker(new MarkerOptions().position(coordinateList.get(0)).title(placeNameList.get(0)).snippet(descriptionList.get(0)));
-
         // moves the camera to the user's location
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 14));
 
@@ -99,13 +117,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(Marker marker) {
 
-                /*
-                // passes along the marker's name and description
-                Intent i = new Intent(MapsActivity.this, MoreInfo.class);
-                i.putExtra("title", marker.getTitle());
-                i.putExtra("information", marker.getSnippet());
-                startActivity(i);
-                 */
+                if(marker.getPosition().equals(myLocation)){
+                    //return false;
+                }
 
                 adapter = new CustomInfoWindowAdapter(MapsActivity.this, marker.getTag().toString());
 
@@ -124,6 +138,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        //advanced
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new MyLocationListener();
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
+            }, REQUEST_COARSE_ACCESS);
+            return;
+        } else {
+            permissionGranted = true;
+        }
+        if (permissionGranted) {
+            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        }
 
     }
 
@@ -198,5 +229,75 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addLocation(new LatLng(54.989082343822005,  -7.296606059240908), "Lisnagelvin Shopping Centre", "4.1 (1,484)\nLisnagelvin Rd, Londonderry BT47 6DF\nOpening Hours: 8am – 8pm\nlisnagelvinsc.com\n028 7132 9409");
         addLocation(new LatLng(55.000245374566056,  -7.321586821056816), "Quayside Shopping Centre",    "4.1 (849)\n42 Strand Rd, Londonderry BT48 7PX\nOpening Hours: 7am – 9:45pm\nquaysidecentre.co.uk\n028 7137 4037");
         addLocation(new LatLng(54.99578665086524,   -7.320638311365454), "Richmond Shopping Centre",    "4.2 (1,739)\nFerryquay St, Londonderry BT48 6QP\nOpening Hours: 8:30am – 9pm\nrichmondcentre.co.uk\n028 7126 0525");
+    }
+
+    // everything below here is for getting the user's current location
+    private class MyLocationListener implements LocationListener{
+
+        // adds a marker and moves the camera to current location whenever your current location changes
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            if(location != null){
+                myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                Marker b = mMap.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title("You are here"));
+                b.setTag("https://www.google.com/url?sa=i&url=https%3A%2F%2Fimgur.com%2Fgallery%2Fmm1EEVs&psig=AOvVaw2_lrNSAvaGe2SEACElLBb2&ust=1607809790664000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCPCR1K30xu0CFQAAAAAdAAAAABAD");
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(@NonNull String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(@NonNull String provider) {
+
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_COARSE_ACCESS:
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    permissionGranted = true;
+                    if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                        return;
+                    }
+                    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                } else {
+                    permissionGranted = false;
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // remove the location listener
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            }, REQUEST_COARSE_ACCESS);
+            return;
+        } else {
+            permissionGranted = true;
+        }
+        if (permissionGranted) {
+            lm.removeUpdates(locationListener);
+        }
     }
 }

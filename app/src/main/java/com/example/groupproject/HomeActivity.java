@@ -45,11 +45,11 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void signup() {
-        Intent intent = new Intent (this, MainActivity.class); // change to SignUpActivity
+        Intent intent = new Intent (this, RegisterActivity.class);
         startActivity(intent);
     }
     public void login() {
-        Intent intent = new Intent(this, MainActivity.class); // change to LoginActivity
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
     }
 }

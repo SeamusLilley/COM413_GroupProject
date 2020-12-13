@@ -14,7 +14,8 @@
     SHA-1 certificate fingerprint:
     A3:71:49:29:C9:8C:77:0C:D0:AC:5E:CD:87:02:F9:22:69:6F:1F:0B
 
-    ^This is different for every project
+    ^This might be different for your project
+    If the map doesn't display, you may need to get a new api key using your own SHA-1
     To get yours, go to gradle (top right) -> tasks -> android -> singingReport
     The SHA-1 will be displayed
     Configure a key at console.developers.google.com in credentials

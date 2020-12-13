@@ -14,11 +14,18 @@
     SHA-1 certificate fingerprint:
     A3:71:49:29:C9:8C:77:0C:D0:AC:5E:CD:87:02:F9:22:69:6F:1F:0B
 
+    ^This is different for every project
+    To get yours, go to gradle (top right) -> tasks -> android -> singingReport
+    The SHA-1 will be displayed
+    Configure a key at console.developers.google.com in credentials
+    You'll need to restrict it to com.example.groupproject and your SHA-1
+    Copy the key that's generated and paste it where my key is
+
     Alternatively, follow the directions here:
     https://developers.google.com/maps/documentation/android/start#get-key
 
     Once you have your key (it starts with "AIza"), replace the "google_maps_key"
     string in this file.
     -->
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCdwbJttCHBxETqHf_PhlkzGJ4iiZPQd3Q</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyAt4OY1nAHFsrtu3z4KLwtIzap0EeSbq4Y</string>
 </resources>
